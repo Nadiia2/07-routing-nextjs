@@ -1,22 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import NoteList from "../../components/NoteList/NoteList";
+import NoteList from "../../../../components/NoteList/NoteList";
 import css from "./NotesPage.module.css";
-import { fetchNotes, type FetchNotesResponse } from "../../lib/api";
+import { fetchNotes, type FetchNotesResponse } from "../../../../lib/api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import Pagination from "../../components/Pagination/Pagination";
-import Modal from "../../components/Modal/Modal";
-import SearchBox from "../../components/SearchBox/SearchBox";
+import Pagination from "../../../../components/Pagination/Pagination";
+import Modal from "../../../../components/Modal/Modal";
+import SearchBox from "../../../../components/SearchBox/SearchBox";
 import { useDebouncedCallback } from "use-debounce";
 import toast, { Toaster } from "react-hot-toast";
-import NoteForm from "../../components/NoteForm/NoteForm";
+import NoteForm from "../../../../components/NoteForm/NoteForm";
 
 // type NotesClientProps = {
 //   res: FetchNotesResponse;
 // };
-
-export default function NotesClient() {
+interface NotesClientProps {
+  tag: string;
+}
+export default function NotesClient({ tag }: NotesClientProps) {
   const [page, setPage] = useState(1);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -38,8 +40,13 @@ export default function NotesClient() {
 
   const { data, isLoading, isFetching, isError, isFetched } =
     useQuery<FetchNotesResponse>({
-      queryKey: ["notes", keyWord, page],
-      queryFn: () => fetchNotes(keyWord, page),
+      queryKey: ["notes", keyWord, page, tag],
+      queryFn: () =>
+        fetchNotes(
+          keyWord,
+          page,
+          tag.toLowerCase() === "all" ? undefined : tag,
+        ),
       // enabled: keyWord !== "",
       placeholderData: keepPreviousData,
     });

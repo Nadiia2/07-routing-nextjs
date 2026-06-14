@@ -12,17 +12,42 @@ export interface FetchNotesResponse {
 export const fetchNotes = async (
   keyWord: string,
   page: number = 1,
+  tag?: string,
 ): Promise<FetchNotesResponse> => {
   try {
-    const url = keyWord.trim()
-      ? `/notes?search=${keyWord}&page=${page}&perPage=12`
-      : `/notes?page=${page}&perPage=12`;
+    const params: {
+      page: number;
+      perPage: number;
+      search?: string;
+      tag?: string;
+    } = {
+      page,
+      perPage: 12,
+    };
 
-    const response = await axios.get<FetchNotesResponse>(url, {
+    if (keyWord.trim()) {
+      params.search = keyWord;
+    }
+
+    if (tag && tag.toLowerCase() !== "all") {
+      params.tag = tag;
+    }
+
+    const response = await axios.get<FetchNotesResponse>("/notes", {
+      params,
       headers: {
         Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
       },
     });
+    // const url = keyWord.trim()
+    //   ? `/notes?search=${keyWord}&page=${page}&perPage=12`
+    //   : `/notes?page=${page}&perPage=12`;
+
+    // const response = await axios.get<FetchNotesResponse>(url, {
+    //   headers: {
+    //     Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
+    //   },
+    // });
 
     return response.data;
   } catch (error) {
